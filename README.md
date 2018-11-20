@@ -10,4 +10,4 @@ Run (blazing fast) textual search to provide Dumb Jump To Definiton for `JavaScr
 
 ## Usage
 
-This extension provides command `vscode-dumb-jump.jump` that can be selected from command pallete after pressing `Shift+Cmd+P`.
+This extension provides command `vscode-dumb-jump.jump` that can be selected from command palette after pressing `Shift+Cmd+P`.

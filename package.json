@@ -1,0 +1,31 @@
+{
+	"name": "vscode-dumb-jump",
+	"description": "Dumb Jump To Definition",
+	"author": "Vaclav Kral",
+	"license": "MIT",
+	"version": "0.0.1",
+	"publisher": "vasa81",
+	"preview": true,
+	"engines": {
+		"vscode": "^1.26.0"
+	},
+	"categories": [],
+	"activationEvents": [
+		"onCommand:vscode-dumb-jump.jump"
+	],
+	"main": "./src/main",
+	"contributes": {
+		"commands": [
+			{
+				"title": "Dumb Jump To Definition",
+				"category": "Search",
+				"command": "vscode-dumb-jump.jump"
+			}
+		]
+	},
+	"repository": {
+		"type": "git",
+        "url": "https://github.com/vasa81/vscode-dumb-jump.git"
+    },
+	"homepage": "https://github.com/vasa81/vscode-dumb-jump"
+}
