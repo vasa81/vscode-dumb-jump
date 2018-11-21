@@ -3,9 +3,8 @@
 	"description": "Dumb Jump To Definition",
 	"author": "Vaclav Kral",
 	"license": "MIT",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "vasa81",
-	"preview": true,
 	"engines": {
 		"vscode": "^1.26.0"
 	},
@@ -27,5 +26,6 @@
 		"type": "git",
         "url": "https://github.com/vasa81/vscode-dumb-jump.git"
     },
-	"homepage": "https://github.com/vasa81/vscode-dumb-jump"
+	"homepage": "https://github.com/vasa81/vscode-dumb-jump",
+	"icon": "icon.png"
 }
