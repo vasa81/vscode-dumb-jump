@@ -5,6 +5,8 @@ const vscode = require("vscode");
 const ChildProcess = require('child_process');
 const { providers } = require('./providers');
 
+let ignoreNextSearch = false;
+
 function ripGrepResultToCodeLocation(result) {
     const data = result.split(':');
 
@@ -76,7 +78,7 @@ function getSearchOptions(word, fileExt) {
     }
 }
 
-function ripGrepSearch(scanPaths, word, fileExt) {
+async function ripGrepSearch(scanPaths, word, fileExt) {
     const { regex, fileTypes } = getSearchOptions(word, fileExt)
 
     const args = fileTypes.map(x => `--glob=${x}`);
@@ -88,35 +90,55 @@ function ripGrepSearch(scanPaths, word, fileExt) {
 
     args.push(scanPaths);
 
-    const runRipgrep = ChildProcess.spawn('rg', args);
+    return new Promise((resolve, reject) => {
+        const runRipgrep = ChildProcess.spawn('rg', args);
 
-    runRipgrep.stdout.setEncoding('utf8');
-    runRipgrep.stderr.setEncoding('utf8');
+        runRipgrep.stdout.setEncoding('utf8');
+        runRipgrep.stderr.setEncoding('utf8');
 
-    let results = "";
+        let results = "";
 
-    runRipgrep.stdout.on('data', (data) => {
-        results += data.toString();
+        runRipgrep.stdout.on('data', (data) => {
+            results += data.toString();
+        });
+
+        runRipgrep.on('close', function (code) {
+            let locations = results.split("\n").filter((el) => { return !!el }).map(ripGrepResultToCodeLocation);
+            resolve(locations);
+
+        });
+
+        runRipgrep.on('error', (error) => {
+            if (error.code === 'ENOENT') {
+                vscode.window.showErrorMessage(`[vscode-dumb-jump] "ripgrep" is not found in $PATH.`)
+            } else {
+                throw error;
+            }
+        });
     });
+}
 
-    runRipgrep.on('close', function(code) {
-        console.log(results);
+async function provideDefinition(document, pos, token) {
+    if (ignoreNextSearch) return [];
 
-        let locations = results.split("\n").filter((el) => {return !!el}).map(ripGrepResultToCodeLocation);
-        if (locations.length > 0) {
-            openLocations(locations);
-        }
-    });
+    try {
+        const range = document.getWordRangeAtPosition(pos);
+        if (!range) return Promise.resolve([]);
+        const word = document.getText(range);
 
-      runRipgrep.on('error', (error) => {
-        if (error.code === 'ENOENT') {
-            vscode.window.showErrorMessage(
-                `[vscode-dumb-jump] "ripgrep" is not found in $PATH.`
-              )
-        } else {
-            throw error;
-        }
-      });
+        ignoreNextSearch = true;
+        const otherProviderResults = await vscode.commands.executeCommand('vscode.executeDefinitionProvider', document.uri, pos);
+        ignoreNextSearch = false;
+
+        let dumbDefinitions = await ripGrepSearch(vscode.workspace.rootPath, word, path.extname(document.fileName));
+
+        return dumbDefinitions;
+
+    } catch (error) {
+        console.error('[vscode-dumb-jump]', error);
+        ignoreNextSearch = false;
+        throw error;
+    }
 }
 
 function jump(editor) {
@@ -125,11 +147,32 @@ function jump(editor) {
     var word = document.getText(range);
 
     if (range) {
-        ripGrepSearch(vscode.workspace.rootPath, word, path.extname(document.fileName));
+        ripGrepSearch(vscode.workspace.rootPath, word, path.extname(document.fileName)).then(locations => {
+            if (locations.length > 0) {
+                openLocations(locations);
+            }
+        });
     }
 }
 
 function activate(context) {
+    // const langs = [
+    //     'javascript',
+    //     'javascriptreact',
+    //     'typescript',
+    //     'typescriptreact',
+    //     'vue',
+    //     'python',
+    // ];
+
+    // context.subscriptions.push(
+    //     langs.map(lang => {
+    //         vscode.languages.registerDefinitionProvider(lang, {
+    //             provideDefinition: provideDefinition,
+    //         });
+    //     })
+    // );
+
     vscode.commands.registerTextEditorCommand('vscode-dumb-jump.jump', jump);
 }
 
