@@ -7,7 +7,7 @@ exports.providers = {
 
     JavaScriptTemplate: {
       regexes: [],
-      extensions: ['*.jsx', '*.vue', '*.jade'],
+      extensions: ['*.jsx', '*.vue', '*.jade', '*.tsx'],
       dependencies: ['JavaScript', 'CoffeeScript', 'TypeScript'],
     },
 

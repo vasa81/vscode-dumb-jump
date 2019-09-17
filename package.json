@@ -3,7 +3,7 @@
 	"description": "Dumb Jump To Definition",
 	"author": "Vaclav Kral",
 	"license": "MIT",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "vasa81",
 	"engines": {
 		"vscode": "^1.26.0"
