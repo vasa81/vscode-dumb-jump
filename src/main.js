@@ -6,6 +6,7 @@ const ChildProcess = require('child_process');
 const { providers } = require('./providers');
 
 let ignoreNextSearch = false;
+let previousLocation = null;
 
 function ripGrepResultToCodeLocation(result) {
     const data = result.split(':');
@@ -149,9 +150,16 @@ function jump(editor) {
     if (range) {
         ripGrepSearch(vscode.workspace.rootPath, word, path.extname(document.fileName)).then(locations => {
             if (locations.length > 0) {
+                previousLocation = new vscode.Location(vscode.Uri.file(document.fileName), range);
                 openLocations(locations);
             }
         });
+    }
+}
+
+function back(editor) {
+    if (previousLocation != null) {
+        return openLocation(previousLocation);
     }
 }
 
@@ -174,6 +182,7 @@ function activate(context) {
     // );
 
     vscode.commands.registerTextEditorCommand('vscode-dumb-jump.jump', jump);
+    vscode.commands.registerTextEditorCommand('vscode-dumb-jump.back', back);
 }
 
 exports.activate = activate;
