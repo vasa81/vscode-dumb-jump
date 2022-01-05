@@ -3,7 +3,7 @@
 	"description": "Dumb Jump To Definition",
 	"author": "Vaclav Kral",
 	"license": "MIT",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"publisher": "vasa81",
 	"engines": {
 		"vscode": "^1.26.0"
@@ -26,7 +26,16 @@
 				"category": "Search",
 				"command": "vscode-dumb-jump.back"
 			}
-		]
+		],
+		"configuration": {
+			"title": "Dumb Jump",
+			"properties": {
+				"dumbJump.pathToRipGrep": {
+					"title": "Path to RipGrep",
+					"type": "string"
+				}
+			}
+		}
 	},
 	"repository": {
 		"type": "git",
