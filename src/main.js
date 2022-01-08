@@ -79,6 +79,10 @@ function getSearchOptions(word, fileExt) {
     }
 }
 
+function getRipGrepPath() {
+    return vscode.workspace.getConfiguration('dumbJump').get('pathToRipGrep') || "rg"
+}
+
 async function ripGrepSearch(scanPaths, word, fileExt) {
     const { regex, fileTypes } = getSearchOptions(word, fileExt)
 
@@ -92,7 +96,7 @@ async function ripGrepSearch(scanPaths, word, fileExt) {
     args.push(scanPaths);
 
     return new Promise((resolve, reject) => {
-        const runRipgrep = ChildProcess.spawn('rg', args);
+        const runRipgrep = ChildProcess.spawn(getRipGrepPath(), args);
 
         runRipgrep.stdout.setEncoding('utf8');
         runRipgrep.stderr.setEncoding('utf8');
