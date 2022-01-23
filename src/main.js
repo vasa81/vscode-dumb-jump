@@ -79,11 +79,39 @@ function getSearchOptions(word, fileExt) {
     }
 }
 
+function getConfiguration() {
+    return vscode.workspace.getConfiguration('dumbJump');
+}
+
 function getRipGrepPath() {
-    return vscode.workspace.getConfiguration('dumbJump').get('pathToRipGrep') || "rg"
+    return getConfiguration().get('pathToRipGrep') || "rg"
+}
+
+function getSearchAllWorkspaceFolders() {
+    return getConfiguration().get('searchAllWorkspaceFolders') || false
+}
+
+/**
+ * Given a document return an array of paths to search depending on the
+ * workspace and the setting to search all workspace folders
+ */
+function searchPaths(document) {
+    const mapToPath = workspace => workspace.uri.fsPath;
+
+    if (getSearchAllWorkspaceFolders()) {
+        return vscode.workspace.workspaceFolders.map(mapToPath);
+    } else {
+        const workspace = vscode.workspace.getWorkspaceFolder(document.uri);
+        return [workspace].filter(Boolean).map(mapToPath);
+    }
 }
 
 async function ripGrepSearch(scanPaths, word, fileExt) {
+    if(scanPaths.length === 0) {
+        vscode.window.showErrorMessage(`[vscode-dumb-jump] No paths to search.`)
+        return [];
+    }
+
     const { regex, fileTypes } = getSearchOptions(word, fileExt)
 
     const args = fileTypes.map(x => `--glob=${x}`);
@@ -93,7 +121,7 @@ async function ripGrepSearch(scanPaths, word, fileExt) {
         '--line-number', '--column', regex,
     ]);
 
-    args.push(scanPaths);
+    args.push(...scanPaths);
 
     return new Promise((resolve, reject) => {
         const runRipgrep = ChildProcess.spawn(getRipGrepPath(), args);
@@ -135,7 +163,7 @@ async function provideDefinition(document, pos, token) {
         const otherProviderResults = await vscode.commands.executeCommand('vscode.executeDefinitionProvider', document.uri, pos);
         ignoreNextSearch = false;
 
-        let dumbDefinitions = await ripGrepSearch(vscode.workspace.rootPath, word, path.extname(document.fileName));
+        let dumbDefinitions = await ripGrepSearch(searchPaths(document), word, path.extname(document.fileName));
 
         return dumbDefinitions;
 
@@ -147,12 +175,12 @@ async function provideDefinition(document, pos, token) {
 }
 
 function jump(editor) {
-    var document = editor.document, selection = editor.selection;
-    var range = document.getWordRangeAtPosition(selection.active);
-    var word = document.getText(range);
+    const document = editor.document, selection = editor.selection;
+    const range = document.getWordRangeAtPosition(selection.active);
+    const word = document.getText(range);
 
     if (range) {
-        ripGrepSearch(vscode.workspace.rootPath, word, path.extname(document.fileName)).then(locations => {
+        ripGrepSearch(searchPaths(document), word, path.extname(document.fileName)).then(locations => {
             if (locations.length > 0) {
                 previousLocation = new vscode.Location(vscode.Uri.file(document.fileName), range);
                 openLocations(locations);

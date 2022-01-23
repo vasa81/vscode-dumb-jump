@@ -3,10 +3,13 @@
 	"description": "Dumb Jump To Definition",
 	"author": "Vaclav Kral",
 	"license": "MIT",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"publisher": "vasa81",
 	"engines": {
 		"vscode": "^1.26.0"
+	},
+	"scripts": {
+		"package": "vsce package"
 	},
 	"categories": [],
 	"activationEvents": [
@@ -33,6 +36,11 @@
 				"dumbJump.pathToRipGrep": {
 					"title": "Path to RipGrep",
 					"type": "string"
+				},
+				"dumbJump.searchAllWorkspaceFolders": {
+					"title": "Search all workspace folders",
+					"type": "boolean",
+					"description": "If enabled in a multi-workspace project all workspace folders will be searched. Otherwise only the document workspace is searched."
 				}
 			}
 		}
