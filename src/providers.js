@@ -90,6 +90,7 @@ exports.providers = {
         /(^|\s)attr_writer\s+:{word}(\s|$)/,
         /(^|\s)define_method\s+:?{word}\s*\(?/,
         /(^|\s){word}\s*=(\s|$)/,
+        /(^|\s)(?:class|module)\s+(?:[A-Z]\w*::)+{word}(\s|$)/,
       ],
       extensions: ['*.rb', '*.ru', '*.haml', '*.erb', '*.rake'],
     },
